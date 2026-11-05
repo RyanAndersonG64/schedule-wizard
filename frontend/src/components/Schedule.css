@@ -1,0 +1,104 @@
+.schedule {
+  --hour-height: 48px;
+  --gutter-width: 56px;
+
+  /* Fill the remaining height of the page and scroll inside it */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+
+  @media (max-width: 640px) {
+    --hour-height: 44px;
+    --gutter-width: 40px;
+  }
+}
+
+.schedule-grid {
+  display: grid;
+  /* Hour-label column, then 7 equal day columns. minmax(0, 1fr) lets columns shrink
+     below their content's width so the grid never overflows sideways. */
+  grid-template-columns: var(--gutter-width) repeat(7, minmax(0, 1fr));
+}
+
+/* --- Header row (stays visible while scrolling) --- */
+
+.schedule-corner,
+.schedule-day-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.schedule-day-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 2px;
+  border-left: 1px solid var(--border);
+}
+
+.schedule-weekday {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.schedule-date {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.is-today .schedule-date {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+/* --- Hour labels --- */
+
+.hour-label {
+  height: var(--hour-height);
+  position: relative;
+
+  span {
+    /* Center each label on its hour line */
+    position: absolute;
+    top: 0;
+    right: 6px;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    span {
+      font-size: 10px;
+      right: 4px;
+    }
+  }
+}
+
+/* --- Day columns --- */
+
+.day-column {
+  position: relative; /* events are positioned inside this */
+  height: calc(24 * var(--hour-height));
+  border-left: 1px solid var(--border);
+  /* One line at the top of every hour */
+  background-image: linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 100% var(--hour-height);
+}
+
+.day-column-today {
+  background-color: var(--today-bg);
+}

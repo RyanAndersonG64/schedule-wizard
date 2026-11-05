@@ -1,0 +1,38 @@
+.event {
+  position: absolute;
+  left: 2px;
+  right: 4px;
+  min-height: 18px; /* keep very short events visible and readable */
+  overflow: hidden;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border-left: 3px solid var(--event-border);
+  background: var(--event-bg);
+  color: var(--event-text);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+/* Flatten the edge where an event continues into the previous or next day */
+.event-continued-from {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.event-continues-to {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.event-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-time {
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

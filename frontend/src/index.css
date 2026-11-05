@@ -1,22 +1,29 @@
+/* Global styles and color tokens. Component styles live next to each component. */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
+  --text: #4b4752;
+  --text-h: #111014;
+  --text-muted: #8a8591;
   --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --surface: #f6f6f7;
+  --surface-hover: #ececee;
+  --border: #e3e2e6;
+  --grid-line: #ececef;
+  --accent: #3b5bdb;
+  --accent-text: #fff;
+  --accent-soft: rgba(59, 91, 219, 0.1);
+  --event-bg: #e3eafc;
+  --event-border: #3b5bdb;
+  --event-text: #1e3a8a;
+  --today-bg: rgba(59, 91, 219, 0.04);
+  --danger: #c92a2a;
+  --danger-bg: #fff0f0;
+  --shadow: rgba(0, 0, 0, 0.12) 0 10px 30px -6px, rgba(0, 0, 0, 0.06) 0 4px 8px -2px;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --radius: 8px;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+  font: 15px/1.4 var(--sans);
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -24,41 +31,34 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
+    --text: #c4c7ce;
     --text-h: #f3f4f6;
+    --text-muted: #868a94;
     --bg: #16171d;
+    --surface: #1f2028;
+    --surface-hover: #2a2c36;
     --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+    --grid-line: #262832;
+    --accent: #7c95f5;
+    --accent-text: #0f1220;
+    --accent-soft: rgba(124, 149, 245, 0.15);
+    --event-bg: #24305a;
+    --event-border: #7c95f5;
+    --event-text: #dbe3ff;
+    --today-bg: rgba(124, 149, 245, 0.06);
+    --danger: #ff8787;
+    --danger-bg: #3a1f22;
+    --shadow: rgba(0, 0, 0, 0.5) 0 10px 30px -6px, rgba(0, 0, 0, 0.3) 0 4px 8px -2px;
   }
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -68,44 +68,47 @@ body {
 
 h1,
 h2 {
-  font-family: var(--heading);
-  font-weight: 500;
   color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
+  font-weight: 600;
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* Shared button styles */
+.button {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 6px 14px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--surface-hover);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.button-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 500;
+
+  &:hover:not(:disabled) {
+    background: var(--accent);
+    filter: brightness(1.1);
+  }
 }

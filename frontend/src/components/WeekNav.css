@@ -1,0 +1,25 @@
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.week-nav-arrow {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.week-nav-title {
+  font-size: 22px;
+  margin-inline: 8px;
+  white-space: nowrap;
+
+  @media (max-width: 640px) {
+    font-size: 17px;
+    margin-inline: 4px;
+  }
+}
