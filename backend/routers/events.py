@@ -59,7 +59,7 @@ def update_event(
     db: DbSession,
     event_id: int,
     data: EventCreate
-    ):
+    ) -> Event:
     event = db.get(Event, event_id)
     if event is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Event not found")

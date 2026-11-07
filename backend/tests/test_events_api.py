@@ -102,9 +102,37 @@ def test_delete_twice_returns_404_the_second_time(client):
 
 def test_update_saves_updates_correctly(client):
     event = create(client, "Coding", "2026-11-04T14:00:00Z", "2026-11-04T15:00:00Z")
-    response = client.get(
-        "/api/events",
-        params={"start": "2026-11-04T00:00:00-05:00", "end": "2026-11-05T00:00:00-05:00"},
+    response = client.put(
+        f"/api/events/{event['id']}",
+        json={"title": "Coding 2", "start_time": "2026-11-04T14:00:00Z", "end_time": "2026-11-05T15:00:00Z"},
     )
-    assert client.put(f"/api/events/{event['id']}", json = {"Coding 2", "2026-12-04T14:00:00Z", "2026-12-04T15:00:00Z"})
     assert response.status_code == 200
+    updated = response.json()
+    assert updated["id"] == event["id"]
+    assert updated["title"] == "Coding 2"
+    assert updated["start_time"] == "2026-11-04T14:00:00Z"
+    assert updated["end_time"] == "2026-11-05T15:00:00Z"
+
+    assert client.get("/api/events", params=WEEK).json() == [updated]
+
+def test_update_returns_404_for_nonexistent_id(client):
+    response = client.put(
+        "/api/events/42069",
+        json={"title":"HUEHUEHUEHUEHUE","start_time": "2026-11-04T00:00:00-05:00", "end_time": "2026-11-05T00:00:00-05:00"},
+    )
+    assert response.status_code == 404
+    assert response.json() == {"detail" : "Event not found"}
+
+def test_prevent_updates_with_times_in_wrong_order(client):
+    event = create(client, "Coding", "2026-11-04T14:00:00Z", "2026-11-04T15:00:00Z")
+
+    response = client.put(
+        f"/api/events/{event['id']}",
+        json = {
+            "title": "ive seen your death it was painful",
+            "start_time": "2026-11-04T15:00:00Z",
+            "end_time": "2026-11-04T14:00:00Z"
+        }
+    )
+    assert response.status_code == 422
+    assert client.get("/api/events", params=WEEK).json() == [event]
