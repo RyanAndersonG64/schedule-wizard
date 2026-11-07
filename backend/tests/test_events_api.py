@@ -76,3 +76,35 @@ def test_list_requires_a_valid_range(client):
     assert client.get("/api/events").status_code == 422
     backwards = {"start": WEEK["end"], "end": WEEK["start"]}
     assert client.get("/api/events", params=backwards).status_code == 422
+
+
+def test_delete_removes_the_event(client):
+    keep = create(client, "Keep", "2026-11-04T14:00:00Z", "2026-11-04T15:00:00Z")
+    remove = create(client, "Remove", "2026-11-05T14:00:00Z", "2026-11-05T15:00:00Z")
+
+    response = client.delete(f"/api/events/{remove['id']}")
+    assert response.status_code == 204
+    assert response.content == b""
+
+    assert client.get("/api/events", params=WEEK).json() == [keep]
+
+
+def test_delete_unknown_event_returns_404(client):
+    response = client.delete("/api/events/999")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Event not found"}
+
+
+def test_delete_twice_returns_404_the_second_time(client):
+    event = create(client, "Coding", "2026-11-04T14:00:00Z", "2026-11-04T15:00:00Z")
+    assert client.delete(f"/api/events/{event['id']}").status_code == 204
+    assert client.delete(f"/api/events/{event['id']}").status_code == 404
+
+def test_update_saves_updates_correctly(client):
+    event = create(client, "Coding", "2026-11-04T14:00:00Z", "2026-11-04T15:00:00Z")
+    response = client.get(
+        "/api/events",
+        params={"start": "2026-11-04T00:00:00-05:00", "end": "2026-11-05T00:00:00-05:00"},
+    )
+    assert client.put(f"/api/events/{event['id']}", json = {"Coding 2", "2026-12-04T14:00:00Z", "2026-12-04T15:00:00Z"})
+    assert response.status_code == 200

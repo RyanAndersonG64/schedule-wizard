@@ -1,4 +1,4 @@
-"""Endpoints for creating and retrieving calendar events."""
+"""Endpoints for creating, retrieving and deleting calendar events."""
 
 from datetime import datetime
 from typing import Annotated
@@ -52,3 +52,33 @@ def list_events(
         .order_by(Event.start_time)
     )
     return list(db.scalars(query))
+
+
+@router.put("/{event_id}", response_model=EventRead)
+def update_event(
+    db: DbSession,
+    event_id: int,
+    data: EventCreate
+    ):
+    event = db.get(Event, event_id)
+    if event is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Event not found")
+    event.title = data.title
+    event.description = data.description
+    event.start_time = _for_db(data.start_time)
+    event.end_time = _for_db(data.end_time)
+    db.commit()
+    db.refresh(event)
+    return event
+    
+
+
+@router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_event(event_id: int, db: DbSession) -> None:
+    # db.get() looks a row up by primary key, or returns None if there isn't one
+    event = db.get(Event, event_id)
+    if event is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Event not found")
+    db.delete(event)
+    db.commit()
+

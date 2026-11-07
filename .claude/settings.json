@@ -6,7 +6,12 @@
       "PowerShell(python --version)",
       "PowerShell($sp = 'C:\\\\Users\\\\bounc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\03a78fa3c3ed1534\\\\221cdd51-bc3b-420b-aa3a-3f9930c19665\\\\scratchpad\\\\e2e'; node \"$sp\\\\check.mjs\" $sp)",
       "PowerShell($sp = 'C:\\\\Users\\\\bounc\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\03a78fa3c3ed1534\\\\221cdd51-bc3b-420b-aa3a-3f9930c19665\\\\scratchpad\\\\e2e'; node \"$sp\\\\debug.mjs\")",
-      "PowerShell(Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { $p = Get-CimInstance Win32_Process -Filter \"ProcessId=$\\($_.OwningProcess\\)\"; \"$\\($p.ProcessId\\) $\\($p.CreationDate\\) $\\($p.CommandLine\\)\" })"
+      "PowerShell(Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { $p = Get-CimInstance Win32_Process -Filter \"ProcessId=$\\($_.OwningProcess\\)\"; \"$\\($p.ProcessId\\) $\\($p.CreationDate\\) $\\($p.CommandLine\\)\" })",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\bounc\\.claude"
     ]
   }
 }
