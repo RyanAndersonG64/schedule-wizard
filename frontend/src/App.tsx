@@ -4,6 +4,7 @@ import EventForm from './components/EventForm.tsx'
 import Schedule from './components/Schedule.tsx'
 import WeekNav from './components/WeekNav.tsx'
 import { type LoadStatus, useWeekEvents } from './hooks/useWeekEvents.ts'
+import type { CalendarEvent } from './types.ts'
 import { addWeeks, isSameDay, startOfWeek } from './utils/dates.ts'
 
 function App() {
@@ -14,8 +15,9 @@ function App() {
 
   // The week on screen, identified by midnight on its Sunday
   const [weekStart, setWeekStart] = useState(currentWeekStart)
-  const [formOpen, setFormOpen] = useState(false)
-  const { events, status, error, retry, addEvent } = useWeekEvents(weekStart)
+  // null: form closed. { event: undefined }: creating. { event }: editing that event.
+  const [form, setForm] = useState<{ event?: CalendarEvent } | null>(null)
+  const { events, status, error, retry, saveEvent, removeEvent } = useWeekEvents(weekStart)
 
   const isCurrentWeek = isSameDay(weekStart, currentWeekStart)
   // New events default to today when viewing this week, otherwise the week's Sunday
@@ -31,20 +33,27 @@ function App() {
           onNext={() => setWeekStart((week) => addWeeks(week, 1))}
           onToday={() => setWeekStart(currentWeekStart)}
         />
-        <button type="button" className="button button-primary" onClick={() => setFormOpen(true)}>
+        <button type="button" className="button button-primary" onClick={() => setForm({})}>
           + New event
         </button>
       </header>
 
       <StatusMessage status={status} error={error} isEmpty={events.length === 0} onRetry={retry} />
 
-      <Schedule weekStart={weekStart} events={events} today={today} />
+      <Schedule
+        weekStart={weekStart}
+        events={events}
+        today={today}
+        onEditEvent={(event) => setForm({ event })}
+        onEventDeleted={removeEvent}
+      />
 
-      {formOpen && (
+      {form && (
         <EventForm
+          event={form.event}
           defaultDate={defaultFormDate}
-          onCreated={addEvent}
-          onClose={() => setFormOpen(false)}
+          onSaved={saveEvent}
+          onClose={() => setForm(null)}
         />
       )}
     </div>

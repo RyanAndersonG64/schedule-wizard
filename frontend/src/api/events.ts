@@ -69,6 +69,8 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   if (!response.ok) {
     throw new ApiError(await errorMessage(response), response.status)
   }
+  // 204 No Content (e.g. after a delete) has no body to parse
+  if (response.status === 204) return undefined as T
   return response.json() as Promise<T>
 }
 
@@ -84,9 +86,10 @@ export async function fetchEvents(
   return data.map(fromResponse)
 }
 
-export async function createEvent(event: NewEvent): Promise<CalendarEvent> {
-  const data = await request<EventResponse>(EVENTS_URL, {
-    method: 'POST',
+/** Request options for sending an event as JSON (used by both create and update). */
+function sendEvent(method: 'POST' | 'PUT', event: NewEvent): RequestInit {
+  return {
+    method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       title: event.title,
@@ -94,6 +97,20 @@ export async function createEvent(event: NewEvent): Promise<CalendarEvent> {
       start_time: event.start.toISOString(),
       end_time: event.end.toISOString(),
     }),
-  })
+  }
+}
+
+export async function createEvent(event: NewEvent): Promise<CalendarEvent> {
+  const data = await request<EventResponse>(EVENTS_URL, sendEvent('POST', event))
   return fromResponse(data)
+}
+
+/** Replace every field of an existing event. */
+export async function updateEvent(id: number, event: NewEvent): Promise<CalendarEvent> {
+  const data = await request<EventResponse>(`${EVENTS_URL}/${id}`, sendEvent('PUT', event))
+  return fromResponse(data)
+}
+
+export async function deleteEvent(id: number): Promise<void> {
+  await request<void>(`${EVENTS_URL}/${id}`, { method: 'DELETE' })
 }

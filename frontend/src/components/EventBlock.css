@@ -4,7 +4,6 @@
   right: 4px;
   min-height: 18px; /* keep very short events visible and readable */
   overflow: hidden;
-  padding: 2px 6px;
   border-radius: 6px;
   border-left: 3px solid var(--event-border);
   background: var(--event-bg);
@@ -23,16 +22,109 @@
   border-bottom-right-radius: 0;
 }
 
-.event-title {
-  font-weight: 600;
+/* The clickable title + time. When collapsed it fills the whole block, so a click
+   anywhere on the event opens it. */
+.event-summary {
+  /* Buttons center their content vertically by default; keep the text at the top */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  padding: 2px 6px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    border-radius: inherit;
+  }
+}
+
+.event-title,
+.event-time {
+  flex-shrink: 0; /* in short events, get cut off at the bottom rather than squashed */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.event-title {
+  font-weight: 600;
+}
+
 .event-time {
   opacity: 0.85;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+/* --- Selected (expanded) --- */
+
+.event-selected {
+  /* Above other events, but below the sticky day headers (z-index 2) */
+  z-index: 1;
+  height: auto;
+  /* Wide enough for the buttons, even in narrow phone-width columns */
+  width: max(calc(100% - 6px), 180px);
+  right: auto;
+  box-shadow: var(--shadow);
+
+  .event-summary {
+    height: auto;
+    cursor: default;
+  }
+
+  /* Show the full title and time instead of cutting them off */
+  .event-title,
+  .event-time {
+    white-space: normal;
+  }
+}
+
+/* Right-hand columns expand to the left, so the card stays on screen */
+.event-align-right {
+  left: auto;
+  right: 4px;
+}
+
+.event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 6px 6px;
+}
+
+.event-description {
+  margin: 0;
+  max-height: 10em; /* long descriptions scroll instead of making a giant card */
+  overflow-y: auto;
+  white-space: pre-wrap; /* keep the line breaks the user typed */
+  overflow-wrap: anywhere;
+}
+
+.event-description-empty {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.event-details-error {
+  margin: 0;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.event-confirm-text {
+  flex-basis: 100%; /* the question gets its own line above the buttons */
+  font-weight: 600;
 }

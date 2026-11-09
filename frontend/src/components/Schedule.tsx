@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CalendarEvent } from '../types.ts'
 import { daysOfWeek, formatHour, formatWeekday, isSameDay } from '../utils/dates.ts'
 import DayColumn from './DayColumn.tsx'
@@ -6,20 +6,34 @@ import './Schedule.css'
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour)
 const INITIAL_SCROLL_HOUR = 7
+/** Columns from this day (Wednesday) on open selected events toward the left */
+const ALIGN_RIGHT_FROM_DAY = 3
+
+/**
+ * The event that's open, and which day's column it's open in. An event that crosses
+ * midnight has a block in two columns; only the one that was clicked expands.
+ */
+interface Selection {
+  eventId: number
+  dayTime: number
+}
 
 interface ScheduleProps {
   weekStart: Date
   events: CalendarEvent[]
   today: Date
+  onEditEvent: (event: CalendarEvent) => void
+  onEventDeleted: (eventId: number) => void
 }
 
 /**
  * The weekly calendar: a sticky row of day headers, then an hour-label column and
  * seven day columns, all inside one scrolling container.
  */
-function Schedule({ weekStart, events, today }: ScheduleProps) {
+function Schedule({ weekStart, events, today, onEditEvent, onEventDeleted }: ScheduleProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const hourLabelsRef = useRef<HTMLDivElement>(null)
+  const [selection, setSelection] = useState<Selection | null>(null)
   const days = daysOfWeek(weekStart)
 
   // Start scrolled to the morning instead of midnight. The hour height comes from
@@ -55,14 +69,30 @@ function Schedule({ weekStart, events, today }: ScheduleProps) {
             </div>
           ))}
         </div>
-        {days.map((day) => (
-          <DayColumn
-            key={day.getTime()}
-            day={day}
-            events={events}
-            isToday={isSameDay(day, today)}
-          />
-        ))}
+        {days.map((day, index) => {
+          const dayTime = day.getTime()
+          return (
+            <DayColumn
+              key={dayTime}
+              day={day}
+              events={events}
+              isToday={isSameDay(day, today)}
+              selectedEventId={selection?.dayTime === dayTime ? selection.eventId : null}
+              alignRight={index >= ALIGN_RIGHT_FROM_DAY}
+              onSelectEvent={(eventId) =>
+                setSelection(eventId === null ? null : { eventId, dayTime })
+              }
+              onEditEvent={(event) => {
+                setSelection(null)
+                onEditEvent(event)
+              }}
+              onEventDeleted={(eventId) => {
+                setSelection(null)
+                onEventDeleted(eventId)
+              }}
+            />
+          )
+        })}
       </div>
     </div>
   )

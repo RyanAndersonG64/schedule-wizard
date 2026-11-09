@@ -106,6 +106,13 @@ export function toDateInputValue(date: Date): string {
   return `${date.getFullYear()}-${month}-${day}`
 }
 
+/** Date -> "HH:MM" (24-hour clock) */
+export function toTimeInputValue(date: Date): string {
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${hours}:${minutes}`
+}
+
 /** "YYYY-MM-DD" + "HH:MM" -> a local Date, or null if either is malformed. */
 export function fromDateAndTimeInputs(date: string, time: string): Date | null {
   const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date)

@@ -50,24 +50,39 @@ export function useWeekEvents(weekStart: Date) {
 
   const retry = useCallback(() => setReloadCount((n) => n + 1), [])
 
-  /** Show a newly created event without reloading the week. */
-  const addEvent = useCallback(
-    (event: CalendarEvent) => {
-      const weekStart = new Date(weekTime)
-      const inThisWeek = event.start < addWeeks(weekStart, 1) && event.end > weekStart
-      if (!inThisWeek) return
+  /** Apply a change to the loaded events, if they're for the week on screen. */
+  const changeEvents = useCallback(
+    (change: (events: CalendarEvent[]) => CalendarEvent[]) => {
       setResult((current) =>
         current && current.requestKey === requestKey
-          ? {
-              ...current,
-              events: [...current.events, event].sort(
-                (a, b) => a.start.getTime() - b.start.getTime(),
-              ),
-            }
+          ? { ...current, events: change(current.events) }
           : current,
       )
     },
-    [requestKey, weekTime],
+    [requestKey],
+  )
+
+  /**
+   * Show a created or edited event without reloading the week. An edit can move an
+   * event out of this week, so the old copy is always removed first.
+   */
+  const saveEvent = useCallback(
+    (event: CalendarEvent) => {
+      const weekStart = new Date(weekTime)
+      const inThisWeek = event.start < addWeeks(weekStart, 1) && event.end > weekStart
+      changeEvents((events) => {
+        const others = events.filter((e) => e.id !== event.id)
+        if (!inThisWeek) return others
+        return [...others, event].sort((a, b) => a.start.getTime() - b.start.getTime())
+      })
+    },
+    [changeEvents, weekTime],
+  )
+
+  /** Remove a deleted event from the screen. */
+  const removeEvent = useCallback(
+    (id: number) => changeEvents((events) => events.filter((e) => e.id !== id)),
+    [changeEvents],
   )
 
   return {
@@ -75,6 +90,7 @@ export function useWeekEvents(weekStart: Date) {
     status,
     error: isCurrent ? result.error : null,
     retry,
-    addEvent,
+    saveEvent,
+    removeEvent,
   }
 }

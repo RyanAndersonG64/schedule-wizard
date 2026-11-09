@@ -61,3 +61,10 @@ frontend/src/
 - **Schema changes:** tables are created with `create_all()`, which doesn't alter
   existing tables. After changing `models.py`, delete `backend/schedule.db` (dev only)
   or set up Alembic for migrations.
+
+### Extra features to add:
+
+- Mark event complete (confetti)
+- Event text changes color when completed or overdue
+- Click time block to add event starting at that time
+- Add Recurring tasks

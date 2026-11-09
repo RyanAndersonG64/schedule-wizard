@@ -1,7 +1,7 @@
 import { type ChangeEvent, type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react'
-import { ApiError, createEvent } from '../api/events.ts'
+import { ApiError, createEvent, updateEvent } from '../api/events.ts'
 import type { CalendarEvent } from '../types.ts'
-import { toDateInputValue } from '../utils/dates.ts'
+import { toDateInputValue, toTimeInputValue } from '../utils/dates.ts'
 import {
   DESCRIPTION_MAX_LENGTH,
   type EventFormErrors,
@@ -12,24 +12,41 @@ import {
 import './EventForm.css'
 
 interface EventFormProps {
+  /** The event to edit. Leave it out to create a new event instead. */
+  event?: CalendarEvent
+  /** Starting date for a new event (ignored when editing) */
   defaultDate: Date
-  onCreated: (event: CalendarEvent) => void
+  onSaved: (event: CalendarEvent) => void
   onClose: () => void
 }
 
-/**
- * Add-event form in a modal <dialog>. The parent renders it only while it's open,
- * so every opening starts with a fresh, empty form.
- */
-function EventForm({ defaultDate, onCreated, onClose }: EventFormProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  const [values, setValues] = useState<EventFormValues>({
+/** The form's starting values: the event being edited, or a blank 9–10 AM event. */
+function initialValues(event: CalendarEvent | undefined, defaultDate: Date): EventFormValues {
+  if (event) {
+    return {
+      title: event.title,
+      description: event.description,
+      date: toDateInputValue(event.start),
+      startTime: toTimeInputValue(event.start),
+      endTime: toTimeInputValue(event.end),
+    }
+  }
+  return {
     title: '',
     description: '',
     date: toDateInputValue(defaultDate),
     startTime: '09:00',
     endTime: '10:00',
-  })
+  }
+}
+
+/**
+ * Add/edit-event form in a modal <dialog>. The parent renders it only while it's
+ * open, so every opening starts fresh from initialValues().
+ */
+function EventForm({ event, defaultDate, onSaved, onClose }: EventFormProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const [values, setValues] = useState(() => initialValues(event, defaultDate))
   const [errors, setErrors] = useState<EventFormErrors>({})
   const [serverError, setServerError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -57,8 +74,10 @@ function EventForm({ defaultDate, onCreated, onClose }: EventFormProps) {
     setServerError(null)
     setSaving(true)
     try {
-      const created = await createEvent(result.event)
-      onCreated(created)
+      const saved = event
+        ? await updateEvent(event.id, result.event)
+        : await createEvent(result.event)
+      onSaved(saved)
       dialogRef.current?.close() // fires onClose, which unmounts this component
     } catch (err) {
       setServerError(err instanceof ApiError ? err.message : 'Could not save the event.')
@@ -71,7 +90,7 @@ function EventForm({ defaultDate, onCreated, onClose }: EventFormProps) {
     <dialog ref={dialogRef} className="event-form-dialog" onClose={onClose}>
       {/* noValidate: show our own error messages instead of the browser's */}
       <form className="event-form" onSubmit={handleSubmit} noValidate>
-        <h2>New event</h2>
+        <h2>{event ? 'Edit event' : 'New event'}</h2>
 
         {serverError && (
           <p className="event-form-server-error" role="alert">

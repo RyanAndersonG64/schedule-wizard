@@ -14,6 +14,7 @@ import {
   minutesSinceMidnight,
   startOfWeek,
   toDateInputValue,
+  toTimeInputValue,
 } from './dates.ts'
 
 const HOUR_MS = 60 * 60 * 1000
@@ -112,6 +113,11 @@ describe('formatHour and formatTime', () => {
 describe('form input conversion', () => {
   it('formats a date for <input type="date">', () => {
     expect(toDateInputValue(new Date(2026, 0, 5))).toBe('2026-01-05')
+  })
+
+  it('formats a time for <input type="time"> on a 24-hour clock', () => {
+    expect(toTimeInputValue(new Date(2026, 10, 4, 9, 5))).toBe('09:05')
+    expect(toTimeInputValue(new Date(2026, 10, 4, 23, 30))).toBe('23:30')
   })
 
   it('combines date and time inputs into a local Date', () => {
